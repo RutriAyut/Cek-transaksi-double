@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cek Donasi Double — BeramalBersama</title>
+<style>
+  @font-face {
+    font-family: 'Fraunces';
+    src: local('Fraunces');
+  }
+  :root{
+    --bg: #F6F4EE;
+    --panel: #FFFFFF;
+    --ink: #24261F;
+    --ink-soft: #63665A;
+    --line: #DEDACB;
+    --forest: #16362E;
+    --forest-dim: #234A3F;
+    --gold: #A9791F;
+    --gold-soft: #F1E4C4;
+    --brick: #A23B2B;
+    --brick-soft: #F6E1DB;
+    --ok: #2F6A4F;
+    --ok-soft: #E1EEE5;
+    --radius: 3px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 48px 28px 80px;
+  }
+  header.top{
+    display:flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 28px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  header.top .title-block h1{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    color: var(--forest);
+  }
+  header.top .title-block p{
+    margin:0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 46ch;
+  }
+  .mark{
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: var(--forest);
+    color: var(--gold-soft);
+    display:flex; align-items:center; justify-content:center;
+    font-family: Georgia, serif;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .layout{
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 860px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+  .panel + .panel{ margin-top: 20px; }
+  .panel h2{
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    margin: 0 0 16px;
+    color: var(--forest);
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+  }
+  .drop{
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 26px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+    background: #FBFAF6;
+  }
+  .drop.dragover{ border-color: var(--gold); background: var(--gold-soft); }
+  .drop p{ margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); }
+  .drop strong{ color: var(--forest); font-size: 14px; }
+  input[type=file]{ display:none; }
+  .filename{
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--ok);
+    word-break: break-all;
+  }
+  label.field{
+    display:block;
+    margin-bottom: 14px;
+  }
+  label.field span{
+    display:block;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  select, input[type=number]{
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #fff;
+    font-size: 13.5px;
+    color: var(--ink);
+    font-family: inherit;
+  }
+  select:focus, input:focus{
+    outline: 2px solid var(--forest-dim);
+    outline-offset: 1px;
+  }
+  .row2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .hint{ font-size: 11.5px; color: var(--ink-soft); margin-top: -8px; margin-bottom: 14px;}
+  button.run{
+    width: 100%;
+    background: var(--forest);
+    color: #FBF8F0;
+    border: none;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background .15s ease;
+  }
+  button.run:hover{ background: var(--forest-dim); }
+  button.run:disabled{ background: #B9B6A8; cursor: not-allowed; }
+  button.ghost{
+    width: 100%;
+    background: transparent;
+    color: var(--forest);
+    border: 1px solid var(--line);
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  button.ghost:hover{ border-color: var(--forest); }
+
+  .summary{
+    display:grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  @media (max-width: 700px){ .summary{ grid-template-columns: repeat(2,1fr); } }
+  .stat{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .stat .num{
+    font-family: Georgia, serif;
+    font-size: 26px;
+    color: var(--forest);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat.flag .num{ color: var(--brick); }
+  .stat .lbl{ font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+  .empty{
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--ink-soft);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+  }
+  .empty .big{ font-size: 15px; color: var(--forest); font-weight:600; margin-bottom: 6px;}
+
+  .group{
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .group-head{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--brick-soft);
+    border-bottom: 1px solid var(--line);
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .group-head .who{ font-size: 13.5px; }
+  .group-head .who b{ color: var(--forest); }
+  .group-head .badge{
+    font-size: 11.5px;
+    background: var(--brick);
+    color: #fff;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th{
+    text-align: left;
+    font-size: 11px;
+    color: var(--ink-soft);
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+  }
+  tbody td{
+    padding: 9px 16px;
+    border-bottom: 1px solid #EFEDE3;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  tbody tr:last-child td{ border-bottom: none; }
+  .nominal{ text-align:right; }
+  .tag-status{
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .tag-sukses{ background: var(--ok-soft); color: var(--ok); }
+  .tag-menunggu{ background: var(--gold-soft); color: var(--gold); }
+  .tag-gagal, .tag-expired{ background: var(--brick-soft); color: var(--brick); }
+  .tag-other{ background: #EDEBE0; color: var(--ink-soft); }
+  footer.note{
+    margin-top: 30px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  .err{
+    background: var(--brick-soft);
+    color: var(--brick);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 12.5px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div style="display:flex; gap:16px; align-items:center;">
+      <div class="mark">CD</div>
+      <div class="title-block">
+        <h1>Cek Donasi Double</h1>
+        <p>Deteksi kemungkinan donasi yang tercatat lebih dari satu kali oleh donatur yang sama.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- LEFT: CONTROLS -->
+    <div>
+      <div class="panel">
+        <h2>1. Upload Data</h2>
+        <div class="drop" id="dropZone">
+          <strong>Klik atau tarik file CSV ke sini</strong>
+          <p>Hasil export query donasi kamu (.csv)</p>
+          <input type="file" id="fileInput" accept=".csv,text/csv">
+        </div>
+        <div class="filename" id="fileName"></div>
+        <div id="uploadErr"></div>
+      </div>
+
+      <div class="panel" id="mapPanel" style="display:none;">
+        <h2>2. Cocokkan Kolom</h2>
+
+        <label class="field">
+          <span>Kolom No HP / Identitas Donatur</span>
+          <select id="colPhone"></select>
+        </label>
+
+        <label class="field">
+          <span>Kolom Nominal</span>
+          <select id="colNominal"></select>
+        </label>
+
+        <label class="field">
+          <span>Kolom Link Program</span>
+          <select id="colLink"></select>
+        </label>
+
+        <label class="field">
+          <span>Kolom Tanggal</span>
+          <select id="colDate"></select>
+        </label>
+
+        <label class="field">
+          <span>Kolom Jam (opsional, jika terpisah dari tanggal)</span>
+          <select id="colTime"></select>
+        </label>
+
+        <label class="field">
+          <span>Kolom Status (opsional)</span>
+          <select id="colStatus"></select>
+        </label>
+
+        <label class="field">
+          <span>Kolom Nama Bank (opsional)</span>
+          <select id="colBank"></select>
+        </label>
+      </div>
+
+      <div class="panel" id="settingsPanel" style="display:none;">
+        <h2>3. Kriteria Deteksi</h2>
+
+        <label class="field">
+          <span>Rentang waktu dianggap "dekat" (menit)</span>
+          <input type="number" id="windowMin" value="30" min="1">
+        </label>
+        <div class="hint">Donasi dengan HP &amp; link sama dalam rentang ini dicurigai double.</div>
+
+        <label class="field">
+          <span>Toleransi selisih nominal (Rp)</span>
+          <input type="number" id="tolNominal" value="1000" min="0" step="100">
+        </label>
+        <div class="hint">Untuk menoleransi kode unik pembayaran (mis. 50.000 vs 50.147).</div>
+
+        <button class="run" id="runBtn">Deteksi Donasi Double</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div>
+      <div id="summaryWrap"></div>
+      <div id="resultsWrap">
+        <div class="empty">
+          <div class="big">Belum ada data</div>
+          Upload file CSV di panel kiri untuk mulai memeriksa donasi double.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="note">
+    Semua proses berjalan di browser kamu sendiri — file tidak dikirim ke server mana pun. Kelompok yang seluruh transaksinya berstatus "sukses" otomatis di-exclude dari hasil (dianggap bukan kasus double yang perlu ditindaklanjuti). Hasil deteksi bersifat indikasi (butuh HP sama + nominal mirip + link sama + waktu berdekatan); tetap cek manual sebelum memutuskan refund/pembatalan.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  let rawRows = [];
+  let headers = [];
+
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const fileNameEl = document.getElementById('fileName');
+  const uploadErr = document.getElementById('uploadErr');
+  const mapPanel = document.getElementById('mapPanel');
+  const settingsPanel = document.getElementById('settingsPanel');
+  const runBtn = document.getElementById('runBtn');
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', e => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file){
+    uploadErr.innerHTML = '';
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      uploadErr.innerHTML = '<div class="err">File harus format .csv</div>';
+      return;
+    }
+    fileNameEl.textContent = '✓ ' + file.name;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const parsed = parseCSV(e.target.result);
+        if (parsed.length < 2) throw new Error('File kosong atau tidak terbaca.');
+        headers = parsed[0];
+        rawRows = parsed.slice(1).filter(r => r.length === headers.length && r.some(c => c !== ''));
+        populateColumnSelects();
+        mapPanel.style.display = 'block';
+        settingsPanel.style.display = 'block';
+      }catch(err){
+        uploadErr.innerHTML = '<div class="err">Gagal membaca file: ' + escapeHtml(err.message) + '</div>';
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  // Simple RFC4180-ish CSV parser (handles quoted fields, commas, newlines in quotes)
+  function parseCSV(text){
+    text = text.replace(/^\uFEFF/, ''); // strip BOM
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++){
+      const c = text[i];
+      const next = text[i+1];
+      if (inQuotes){
+        if (c === '"' && next === '"'){ field += '"'; i++; }
+        else if (c === '"'){ inQuotes = false; }
+        else { field += c; }
+      } else {
+        if (c === '"'){ inQuotes = true; }
+        else if (c === ','){ row.push(field); field = ''; }
+        else if (c === '\r'){ /* skip */ }
+        else if (c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+        else { field += c; }
+      }
+    }
+    if (field.length > 0 || row.length > 0){ row.push(field); rows.push(row); }
+    return rows.filter(r => !(r.length === 1 && r[0] === ''));
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function populateColumnSelects(){
+    const selects = ['colPhone','colNominal','colLink','colDate','colTime','colStatus','colBank'];
+    selects.forEach(id => {
+      const sel = document.getElementById(id);
+      sel.innerHTML = '';
+      if (id === 'colTime' || id === 'colStatus' || id === 'colBank'){
+        const optNone = document.createElement('option');
+        optNone.value = '-1'; optNone.textContent = '(tidak ada / lewati)';
+        sel.appendChild(optNone);
+      }
+      headers.forEach((h, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx; opt.textContent = h;
+        sel.appendChild(opt);
+      });
+    });
+    // best-effort auto guess
+    autoGuess('colPhone', ['wa','no_hp','nohp','phone','hp']);
+    autoGuess('colNominal', ['nominal','total','amount']);
+    autoGuess('colLink', ['link','program']);
+    autoGuess('colDate', ['tanggal_masuk','inserttgl','date','tanggal']);
+    autoGuess('colTime', ['waktu','time','jam']);
+    autoGuess('colStatus', ['status']);
+    autoGuess('colBank', ['bank_name','bank','nama_bank']);
+  }
+
+  function autoGuess(selectId, candidates){
+    const sel = document.getElementById(selectId);
+    const lowerHeaders = headers.map(h => h.toLowerCase().trim());
+    for (const cand of candidates){
+      const idx = lowerHeaders.findIndex(h => h === cand || h.includes(cand));
+      if (idx >= 0){ sel.value = idx; return; }
+    }
+  }
+
+  function normalizePhone(v){
+    if (!v) return '';
+    let s = String(v).replace(/[^0-9]/g, '');
+    if (s.startsWith('620')) s = '62' + s.slice(3);
+    if (s.startsWith('0')) s = '62' + s.slice(1);
+    if (!s.startsWith('62') && s.length > 5) s = '62' + s;
+    return s;
+  }
+
+  function parseNominal(v){
+    if (v === null || v === undefined) return NaN;
+    let s = String(v).trim();
+    s = s.replace(/[Rp\s]/gi, '');
+    // handle "1.234.567,89" (ID format) vs "1234567.89"
+    if (/,\d{1,2}$/.test(s) && s.includes('.')) {
+      s = s.replace(/\./g, '').replace(',', '.');
+    } else if (s.includes(',') && !s.includes('.')) {
+      s = s.replace(',', '.');
+    } else {
+      s = s.replace(/,/g, '');
+    }
+    const n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  }
+
+  function parseDateTime(dateStr, timeStr){
+    let combined = (dateStr || '').trim();
+    if (timeStr && timeStr.trim() !== ''){
+      combined += ' ' + timeStr.trim();
+    }
+    combined = combined.replace(' ', 'T');
+    let d = new Date(combined);
+    if (isNaN(d.getTime())){
+      d = new Date((dateStr || '') + ' ' + (timeStr || ''));
+    }
+    return d;
+  }
+
+  function statusClass(status){
+    const s = (status || '').toLowerCase();
+    if (s.includes('sukses') || s.includes('success')) return 'tag-sukses';
+    if (s.includes('menunggu') || s.includes('pending')) return 'tag-menunggu';
+    if (s.includes('gagal') || s.includes('expired') || s.includes('fail')) return 'tag-gagal';
+    return 'tag-other';
+  }
+
+  function fmtRp(n){
+    if (isNaN(n)) return '-';
+    return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  }
+
+  runBtn.addEventListener('click', runDetection);
+
+  function runDetection(){
+    const iPhone = parseInt(document.getElementById('colPhone').value);
+    const iNominal = parseInt(document.getElementById('colNominal').value);
+    const iLink = parseInt(document.getElementById('colLink').value);
+    const iDate = parseInt(document.getElementById('colDate').value);
+    const iTime = parseInt(document.getElementById('colTime').value);
+    const iStatus = parseInt(document.getElementById('colStatus').value);
+    const iBank = parseInt(document.getElementById('colBank').value);
+    const windowMin = parseFloat(document.getElementById('windowMin').value) || 30;
+    const tolNominal = parseFloat(document.getElementById('tolNominal').value) || 0;
+
+    const records = rawRows.map((r, idx) => {
+      const phone = normalizePhone(r[iPhone]);
+      const nominal = parseNominal(r[iNominal]);
+      const link = (r[iLink] || '').trim();
+      const dateStr = r[iDate] || '';
+      const timeStr = iTime >= 0 ? (r[iTime] || '') : '';
+      const dt = parseDateTime(dateStr, timeStr);
+      const status = iStatus >= 0 ? r[iStatus] : '';
+      const bank = iBank >= 0 ? r[iBank] : '';
+      return {
+        idx, phone, nominal, link,
+        dtRaw: (dateStr + ' ' + timeStr).trim(),
+        dt: isNaN(dt.getTime()) ? null : dt,
+        status,
+        bank,
+        original: r
+      };
+    }).filter(rec => rec.phone && !isNaN(rec.nominal) && rec.dt);
+
+    // group by phone + link
+    const byKey = {};
+    records.forEach(rec => {
+      const key = rec.phone + '||' + rec.link;
+      if (!byKey[key]) byKey[key] = [];
+      byKey[key].push(rec);
+    });
+
+    const duplicateGroups = [];
+    Object.keys(byKey).forEach(key => {
+      const list = byKey[key].sort((a,b) => a.dt - b.dt);
+      let cluster = [list[0]];
+      for (let i = 1; i < list.length; i++){
+        const prev = cluster[cluster.length - 1];
+        const cur = list[i];
+        const diffMin = Math.abs(cur.dt - prev.dt) / 60000;
+        const diffNominal = Math.abs(cur.nominal - prev.nominal);
+        if (diffMin <= windowMin && diffNominal <= tolNominal){
+          cluster.push(cur);
+        } else {
+          if (cluster.length > 1) duplicateGroups.push(cluster);
+          cluster = [cur];
+        }
+      }
+      if (cluster.length > 1) duplicateGroups.push(cluster);
+    });
+
+    // exclude kelompok yang semua transaksinya berstatus sukses
+    // (kalau semua sukses, dianggap bukan masalah double yang perlu ditindaklanjuti)
+    const filteredGroups = iStatus >= 0
+      ? duplicateGroups.filter(g => !g.every(r => (r.status || '').toLowerCase().includes('sukses')))
+      : duplicateGroups;
+
+    renderResults(records, filteredGroups, iStatus, iBank);
+  }
+
+  function renderResults(records, groups, iStatus, iBank){
+    const summaryWrap = document.getElementById('summaryWrap');
+    const resultsWrap = document.getElementById('resultsWrap');
+
+    const totalDupRows = groups.reduce((s,g) => s + g.length, 0);
+    const totalExtra = groups.reduce((s,g) => s + (g.length - 1), 0);
+    const totalExtraNominal = groups.reduce((s,g) => {
+      const sorted = [...g].sort((a,b) => a.dt - b.dt);
+      return s + sorted.slice(1).reduce((ss, r) => ss + r.nominal, 0);
+    }, 0);
+
+    summaryWrap.innerHTML = `
+      <div class="summary">
+        <div class="stat">
+          <div class="num">${records.length.toLocaleString('id-ID')}</div>
+          <div class="lbl">Baris dianalisis</div>
+        </div>
+        <div class="stat flag">
+          <div class="num">${groups.length.toLocaleString('id-ID')}</div>
+          <div class="lbl">Kelompok terindikasi double</div>
+        </div>
+        <div class="stat flag">
+          <div class="num">${totalExtra.toLocaleString('id-ID')}</div>
+          <div class="lbl">Transaksi "kelebihan" (selain yang pertama)</div>
+        </div>
+        <div class="stat flag">
+          <div class="num" style="font-size:20px;">${fmtRp(totalExtraNominal)}</div>
+          <div class="lbl">Estimasi nominal double</div>
+        </div>
+      </div>
+    `;
+
+    if (groups.length === 0){
+      resultsWrap.innerHTML = `
+        <div class="empty">
+          <div class="big">Tidak ditemukan indikasi donasi double</div>
+          Berdasarkan kriteria saat ini (rentang waktu &amp; toleransi nominal), tidak ada donasi yang terlihat double.
+        </div>`;
+      return;
+    }
+
+    let html = '';
+    groups
+      .slice()
+      .sort((a,b) => {
+        const aLatest = Math.max(...a.map(r => r.dt.getTime()));
+        const bLatest = Math.max(...b.map(r => r.dt.getTime()));
+        return bLatest - aLatest; // terbaru dulu
+      })
+      .forEach((g, gi) => {
+        const sorted = [...g].sort((a,b) => a.dt - b.dt);
+        const first = sorted[0];
+        html += `<div class="group">
+          <div class="group-head">
+            <div class="who">HP <b>${escapeHtml(first.phone)}</b> &middot; Link <b>${escapeHtml(first.link || '-')}</b></div>
+            <div class="badge">${sorted.length} transaksi berdekatan</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Nominal</th>
+                ${iBank >= 0 ? '<th>Bank</th>' : ''}
+                ${iStatus >= 0 ? '<th>Status</th>' : ''}
+                <th>Selisih dari transaksi pertama</th>
+              </tr>
+            </thead>
+            <tbody>`;
+        sorted.forEach((r, i) => {
+          const diffMin = i === 0 ? 0 : Math.round((r.dt - first.dt) / 60000);
+          html += `<tr>
+            <td>${escapeHtml(r.dtRaw)}</td>
+            <td class="nominal">${fmtRp(r.nominal)}</td>
+            ${iBank >= 0 ? `<td>${escapeHtml(r.bank || '-')}</td>` : ''}
+            ${iStatus >= 0 ? `<td><span class="tag-status ${statusClass(r.status)}">${escapeHtml(r.status || '-')}</span></td>` : ''}
+            <td>${i === 0 ? '<em>transaksi pertama</em>' : diffMin + ' menit kemudian'}</td>
+          </tr>`;
+        });
+        html += `</tbody></table></div>`;
+      });
+
+    resultsWrap.innerHTML = html;
+
+    // export button
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'ghost';
+    exportBtn.textContent = 'Download hasil (CSV)';
+    exportBtn.style.marginTop = '4px';
+    exportBtn.onclick = () => exportCSV(groups, iStatus, iBank);
+    resultsWrap.prepend(exportBtn);
+  }
+
+  function exportCSV(groups, iStatus, iBank){
+    const lines = [['kelompok_ke','no_hp','link_program','waktu','nominal','bank','status'].join(',')];
+    groups.forEach((g, gi) => {
+      const sorted = [...g].sort((a,b) => a.dt - b.dt);
+      sorted.forEach(r => {
+        lines.push([
+          gi + 1,
+          r.phone,
+          '"' + (r.link || '').replace(/"/g,'""') + '"',
+          '"' + r.dtRaw + '"',
+          r.nominal,
+          '"' + (iBank >= 0 ? (r.bank||'') : '') + '"',
+          '"' + (iStatus >= 0 ? (r.status||'') : '') + '"'
+        ].join(','));
+      });
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'donasi_double_terindikasi.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+})();
+</script>
+</body>
+</html>
